@@ -194,7 +194,7 @@ class tls_ticket_auth(plain.plain):
     def decode_error_return(self, buf):
         self.handshake_status = -1
         self.overhead = 0
-        if self.method == 'tls1.2_ticket_auth':
+        if self.method in ['tls1.2_ticket_auth', 'tls1.2_ticket_fastauth']:
             return (b'E'*2048, False, False)
         return (buf, True, False)
 
