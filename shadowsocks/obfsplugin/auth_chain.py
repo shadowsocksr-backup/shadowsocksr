@@ -640,16 +640,22 @@ class auth_chain_b(auth_chain_a):
         self.salt = b"auth_chain_b"
         self.no_compatible_method = 'auth_chain_b'
         self.data_size_list = []
+        self.data_size_list2 = []
 
     def init_data_size(self, key):
         if self.data_size_list:
             self.data_size_list = []
+            self.data_size_list2 = []
         random = xorshift128plus()
         random.init_from_bin(key)
-        list_len = random.next() % 16 + 4;
+        list_len = random.next() % 16 + 4
         for i in range(0, list_len):
             self.data_size_list.append((int)(random.next() % 1440))
         self.data_size_list.sort()
+        list_len = random.next() % 32 + 32
+        for i in range(0, list_len):
+            self.data_size_list2.append((int)(random.next() % 1440))
+        self.data_size_list2.sort()
 
     def set_server_info(self, server_info):
         self.server_info = server_info
@@ -668,6 +674,11 @@ class auth_chain_b(auth_chain_a):
         final_pos = pos + random.next() % (len(self.data_size_list) + 1 - pos)
         if final_pos < len(self.data_size_list):
             return self.data_size_list[final_pos] - buf_size - self.server_info.overhead
+
+        pos = bisect.bisect_left(self.data_size_list2, buf_size + self.server_info.overhead)
+        final_pos = pos + random.next() % (len(self.data_size_list2) + 1 - pos)
+        if final_pos < len(self.data_size_list2):
+            return self.data_size_list2[final_pos] - buf_size - self.server_info.overhead
 
         if buf_size > 1300:
             return random.next() % 31
