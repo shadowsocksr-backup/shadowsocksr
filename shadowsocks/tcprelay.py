@@ -858,6 +858,10 @@ class TCPRelayHandler(object):
                 if self._encrypt_correct:
                     try:
                         obfs_decode = self._obfs.server_decode(data)
+                        if self._stage == STAGE_INIT:
+                            self._overhead = self._obfs.get_overhead(self._is_local) + self._protocol.get_overhead(self._is_local)
+                            server_info = self._protocol.get_server_info()
+                            server_info.overhead = self._overhead
                     except Exception as e:
                         shell.print_exception(e)
                         logging.error("exception from %s:%d" % (self._client_address[0], self._client_address[1]))
