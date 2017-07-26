@@ -648,13 +648,13 @@ class auth_chain_b(auth_chain_a):
             self.data_size_list2 = []
         random = xorshift128plus()
         random.init_from_bin(key)
-        list_len = random.next() % 16 + 4
+        list_len = random.next() % 8 + 4
         for i in range(0, list_len):
-            self.data_size_list.append((int)(random.next() % 1440))
+            self.data_size_list.append((int)(random.next() % 2340 % 2040 % 1440))
         self.data_size_list.sort()
-        list_len = random.next() % 32 + 32
+        list_len = random.next() % 16 + 16
         for i in range(0, list_len):
-            self.data_size_list2.append((int)(random.next() % 1440))
+            self.data_size_list2.append((int)(random.next() % 2340 % 2040 % 1440))
         self.data_size_list2.sort()
 
     def set_server_info(self, server_info):
