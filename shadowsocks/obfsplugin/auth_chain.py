@@ -671,7 +671,7 @@ class auth_chain_b(auth_chain_a):
             return 0
         random.init_from_bin_len(last_hash, buf_size)
         pos = bisect.bisect_left(self.data_size_list, buf_size + self.server_info.overhead)
-        final_pos = pos + random.next() % (len(self.data_size_list) + int(len(self.data_size_list) / 2))
+        final_pos = pos + random.next() % (len(self.data_size_list))
         if final_pos < len(self.data_size_list):
             return self.data_size_list[final_pos] - buf_size - self.server_info.overhead
 
@@ -679,6 +679,8 @@ class auth_chain_b(auth_chain_a):
         final_pos = pos + random.next() % (len(self.data_size_list2))
         if final_pos < len(self.data_size_list2):
             return self.data_size_list2[final_pos] - buf_size - self.server_info.overhead
+        if final_pos < pos + len(self.data_size_list2) - 1:
+            return 0
 
         if buf_size > 1300:
             return random.next() % 31
