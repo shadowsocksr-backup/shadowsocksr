@@ -1,0 +1,18 @@
+[Unit]
+Description=ShadowsocksR server
+After=syslog.target
+After=network.target
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=512000
+LimitNPROC=512000
+Type=simple
+WorkingDirectory=/usr/local/shadowsocksr
+ExecStart=/usr/bin/python /usr/local/shadowsocksr/server.py
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
