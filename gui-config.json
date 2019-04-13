@@ -1,0 +1,35 @@
+{
+	"configs" : [
+		{
+			"remarks" : "",
+			"id" : "B02D90DFE5E7868A6D43D22DCEFC42B5",
+			"server" : "server host",
+			"server_port" : 8388,
+			"server_udp_port" : 0,
+			"password" : "0",
+			"method" : "aes-256-cfb",
+			"protocol" : "origin",
+			"protocolparam" : "",
+			"obfs" : "plain",
+			"obfsparam" : "",
+			"remarks_base64" : "",
+			"group" : "FreeSSR-public",
+			"enable" : true,
+			"udp_over_tcp" : false
+		}
+	],
+	"nodeFeedAutoUpdate" : true,
+	"serverSubscribes" : [
+		{
+			"URL" : "xx",
+			"Group" : "xxx",
+			"LastUpdateTime" : 1554836771
+		}
+	],
+	"token" : {
+
+	},
+	"portMap" : {
+
+	}
+}

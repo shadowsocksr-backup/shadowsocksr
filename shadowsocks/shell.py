@@ -26,7 +26,6 @@ import logging
 from shadowsocks.common import to_bytes, to_str, IPNetwork, PortRange
 from shadowsocks import encrypt
 
-
 VERBOSE_LEVEL = 5
 
 verbose = 0
@@ -52,6 +51,7 @@ def print_exception(e):
         import traceback
         traceback.print_exc()
 
+
 def __version():
     version_str = ''
     try:
@@ -65,16 +65,19 @@ def __version():
             pass
     return version_str
 
+
 def print_shadowsocks():
     print('ShadowsocksR %s' % __version())
+
 
 def log_shadowsocks_version():
     logging.info('ShadowsocksR %s' % __version())
 
 
-def find_config():
+def find_config(type='single'):
     user_config_path = 'user-config.json'
     config_path = 'config.json'
+    all_config_path = 'gui-config.json'
 
     def sub_find(file_name):
         if os.path.exists(file_name):
@@ -82,7 +85,10 @@ def find_config():
         file_name = os.path.join(os.path.abspath('..'), file_name)
         return file_name if os.path.exists(file_name) else None
 
+    if type == 'ALL':
+        return sub_find(all_config_path)
     return sub_find(user_config_path) or sub_find(config_path)
+
 
 def check_config(config, is_local):
     if config.get('daemon', None) == 'stop':
@@ -110,13 +116,13 @@ def check_config(config, is_local):
         logging.warning('warning: local set to listen on 0.0.0.0, it\'s not safe')
     if config.get('server', '') in ['127.0.0.1', 'localhost']:
         logging.warning('warning: server set to listen on %s:%s, are you sure?' %
-                     (to_str(config['server']), config['server_port']))
+                        (to_str(config['server']), config['server_port']))
     if config.get('timeout', 300) < 100:
         logging.warning('warning: your timeout %d seems too short' %
-                     int(config.get('timeout')))
+                        int(config.get('timeout')))
     if config.get('timeout', 300) > 600:
         logging.warning('warning: your timeout %d seems too long' %
-                     int(config.get('timeout')))
+                        int(config.get('timeout')))
     if config.get('password') in [b'mypassword']:
         logging.error('DON\'T USE DEFAULT PASSWORD! Please change it in your '
                       'config.json!')
@@ -160,7 +166,6 @@ def get_config(is_local):
         if config_path is None:
             config_path = find_config()
 
-
         if config_path:
             logging.debug('loading config from %s' % config_path)
             with open(config_path, 'rb') as f:
@@ -169,7 +174,6 @@ def get_config(is_local):
                 except ValueError as e:
                     logging.error('found an error in config.json: %s', str(e))
                     sys.exit(1)
-
 
         v_count = 0
         for key, value in optlist:
@@ -398,6 +402,7 @@ def _decode_dict(data):
         rv[key] = value
     return rv
 
+
 class JSFormat:
     def __init__(self):
         self.state = 0
@@ -435,6 +440,7 @@ class JSFormat:
                 return "\n"
         return ""
 
+
 def remove_comment(json):
     fmt = JSFormat()
     return "".join([fmt.push(c) for c in json])
@@ -443,3 +449,31 @@ def remove_comment(json):
 def parse_json_in_str(data):
     # parse json and convert everything from unicode to str
     return json.loads(data, object_hook=_decode_dict)
+
+
+def list_multi_config():
+    config_path = find_config(type='ALL')
+    with open(config_path, 'rb') as f:
+        configs = json.loads(f.read().decode('utf8'))
+        configs = configs['configs']
+        for index, config in enumerate(configs):
+            print(str([index]) + ':' + str(config['remarks']))
+
+
+def checkout_config(index):
+    config_path = find_config(type='ALL')
+    use_config_path = find_config()
+    with open(use_config_path, 'w+') as f0:
+        f0.truncate()
+        with open(config_path, 'rb') as f:
+            configs = json.loads(f.read().decode('utf8'))
+            configs = configs['configs']
+            config = configs[index]
+            del config['remarks']
+            del config['group']
+            f0.write(json.dumps(config, ensure_ascii=False))
+    print('config update successful')
+
+
+if __name__ == '__main__':
+    checkout_config(29)

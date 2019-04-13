@@ -1,0 +1,78 @@
+#!/bin/bash
+#使用方法：把该脚本放到$PATH里面并加入可执行权限就行（比如说放到/usr/local/bin）
+#首次使用输入ssr install后安装时会自动安装到/usr/local/share/shadowsocksr
+#输入ssr config进行配置，输入JSON格式的配置文件
+#输入ssr uninstall卸载
+#输入ssr help 帮助信息
+set -e
+if [ -z $EDITOR ];then
+    EDITOR=vi
+fi
+
+help() {
+    echo ShadowSocksR python client tool
+    echo -e if you have not install ssr, please run \"ssr install\"
+    echo Usage:
+    echo -e "\t" ssr help
+    echo -e "\t" ssr config : edit config.json
+    echo -e "\t" ssr install : install shadowsocksr client
+    echo -e "\t" ssr uninstall : uninstall shadowsocksr client
+    echo -e "\t" ssr start : start the shadowsocks service
+    echo -e "\t" ssr stop : stop the shadowsocks service
+    echo -e "\t" ssr list : list all the nodes available
+    echo -e "\t" ssr check[index] : check out one node
+    echo -e "\t" ssr restart : restart ssr client
+
+}
+install_path=/usr/local/share/shadowsocksr
+if [ $# == 0 ];then
+    help
+    
+elif [ $1 == "help" ];then
+    help
+    
+elif [ $1 == "install" ];then
+    sudo git clone -b manyuser https://github.com/shadowsocksr-backup/shadowsocksr.git $install_path
+    # sudo git clone -b rm https://github.com/the0demiurge/not-in-use.git $install_path
+    
+elif [ $1 == "uninstall" ];then
+    echo "Danger! are you to remove $install_path forever?(y/N)"
+    read doit
+    if [ $doit == 'y' ];then
+        sudo rm -rvf $install_path
+    fi
+    
+elif [ $1 == "config" ];then
+    sudo $EDITOR $install_path/config.json
+    cd $install_path/shadowsocks/
+    ssr restart
+
+elif [ $1 == "start" ];then
+    cd $install_path/shadowsocks/
+    sudo python local.py -d start
+    
+elif [ $1 == "stop" ];then
+    cd $install_path/shadowsocks/
+    sudo python local.py -d stop
+
+elif [ $1 == "restart" ];then
+    cd $install_path/shadowsocks/
+    sudo python local.py -d stop
+    sudo python local.py -d start
+
+elif [ $1 == "list" ];then
+    cd $install_path
+    sudo python3 -c 'from shadowsocks.shell import list_multi_config;list_multi_config()'
+
+elif [ $1 == "check" ];then
+    cd $install_path
+    sudo python3 -c 'from shadowsocks.shell import checkout_config;checkout_config('$2')'
+    ssr restart
+
+elif [ $1 == "log" ];then
+    tail -f /var/log/shadowsocks.log
+    
+elif [ $1 == "shell" ];then
+    cd $install_path/shadowsocks/
+    sudo python local.py $@
+fi
