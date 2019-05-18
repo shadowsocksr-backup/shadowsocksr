@@ -82,8 +82,8 @@ def main():
         protocol_param = config.get("protocol_param", '')
         obfs = config.get("obfs", 'plain')
         obfs_param = config.get("obfs_param", '')
-        bind = config.get("out_bind", '')
-        bindv6 = config.get("out_bindv6", '')
+        bind = common.to_str(config.get("out_bind", ''))
+        bindv6 = common.to_str(config.get("out_bindv6", ''))
         if type(password_obfs) == list:
             password = password_obfs[0]
             obfs = common.to_str(password_obfs[1])
